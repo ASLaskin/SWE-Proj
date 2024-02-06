@@ -18,8 +18,7 @@ app.use(cors());
 
 const mongoURI = `mongodb+srv://SWEPassword1:${encodeURIComponent(MONGODB_PASS)}@cluster0.azznp8r.mongodb.net/?retryWrites=true&w=majority`;
 
-mongoose.connect(mongoURI, {
-  })
+mongoose.connect(mongoURI, {})
   .then(() => {
     console.log("Connected to MongoDB");
   })
@@ -38,7 +37,7 @@ const User = mongoose.model('User', userSchema);
 
 app.get('/users', async (req, res) => {
   try {
-    const users = await UserModel.find();
+    const users = await User.find();
     res.json(users);
   } catch (error) {
     console.error(error);
@@ -49,7 +48,7 @@ app.get('/users', async (req, res) => {
 app.post('/users', async (req, res) => {
   try {
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
-    const newUser = new UserModel({
+    const newUser = new User({
       name: req.body.name,
       password: hashedPassword,
     });
@@ -63,7 +62,7 @@ app.post('/users', async (req, res) => {
 
 app.post('/users/login', async (req, res) => {
   try {
-    const user = await UserModel.findOne({ name: req.body.name });
+    const user = await User.findOne({ name: req.body.name });
     if (!user) {
       return res.status(400).send('Cannot find user');
     }
