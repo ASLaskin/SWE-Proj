@@ -4,6 +4,7 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
+const axios = require('axios');
 
 const MONGODB_PASS = process.env.MongoDBPass;
 
@@ -15,6 +16,15 @@ if (!MONGODB_PASS) {
 const app = express();
 app.use(express.json());
 app.use(cors());
+
+app.get('/recipies/:query', async (req,res) => {
+  const response = await axios.get(
+    `https://api.edamam.com/api/recipes/v2?type=any&beta=false&q=${wants}&app_id=${process.env.APP_ID}&app_key=${process.env.APP_KEY}&random=true`
+  )
+
+  console.log(response.data.hits.label)
+  res.json(response.data)
+})
 
 const mongoURI = `mongodb+srv://SWEPassword1:${encodeURIComponent(MONGODB_PASS)}@cluster0.azznp8r.mongodb.net/?retryWrites=true&w=majority`;
 

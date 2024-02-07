@@ -22,3 +22,8 @@ Content-Type: application/json
     "name": "username",
     "password": "password"
 }
+
+###
+
+GET http://localhost:5000/recipies/:query
+Content-Type: application/json
