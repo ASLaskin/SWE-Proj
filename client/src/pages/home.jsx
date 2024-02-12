@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import Header from '../components/header';
+import { Link } from 'react-router-dom';
 
 const Home = () => {
   const [loaded, setLoaded] = useState(false);
@@ -23,12 +24,15 @@ const Home = () => {
       <Header />
       <div className={`text-4xl text-black flex flex-col flex-wrap text-center items-center justify-center h-full mb-20 ${loaded ? 'fade-in' : ''}`}>
         <h1 className='font-bold text-6xl bg-white bg-opacity-80  '>Find what you're <a className='italic'>Craven</a>™</h1>
-        <button
+        <Link to="/signup">
+        <a
           type='button'
-          className='text-white font-semibold bg-purple-600 hover:bg-blue-800 rounded-lg py-2 px-2 mt-4'
+          className='text-white font-semibold bg-primaryColor hover:bg- rounded-lg py-2 px-2 mt-4 hover:bg-secondaryColor'
         >
           Start Now
-        </button>
+        </a>
+        </Link>
+
       </div>
     </div>
     </>
