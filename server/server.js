@@ -18,12 +18,11 @@ app.use(express.json());
 app.use(cors());
 
 app.get('/recipies/:query', async (req,res) => {
-  const response = await axios.get(
-    `https://api.edamam.com/api/recipes/v2?type=any&beta=false&q=${wants}&app_id=${process.env.APP_ID}&app_key=${process.env.APP_KEY}&random=true`
-  )
-
-  console.log(response.data.hits.label)
-  res.json(response.data)
+  // const response = await axios.get(
+  //   `https://api.edamam.com/api/recipes/v2?type=any&beta=false&q=${wants}&app_id=${process.env.APP_ID}&app_key=${process.env.APP_KEY}&random=true`
+  // )
+  // console.log(response.data.hits.label)
+  // res.json(response.data)
 })
 
 const mongoURI = `mongodb+srv://SWEPassword1:${encodeURIComponent(MONGODB_PASS)}@cluster0.azznp8r.mongodb.net/?retryWrites=true&w=majority`;
@@ -73,6 +72,7 @@ app.post('/users', async (req, res) => {
 app.post('/users/login', async (req, res) => {
   try {
     const user = await User.findOne({ name: req.body.name });
+    console.log(user);
     if (!user) {
       return res.status(400).send('Cannot find user');
     }
@@ -86,6 +86,18 @@ app.post('/users/login', async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).send('Internal Server Error');
+  }
+});
+
+app.post('/swiping', async (req, res) => {
+  try {
+    console.log("fetching data");
+    const response = await axios.get(`https://api.edamam.com/api/recipes/v2?type=any&beta=false&q=${req.body.food}&app_id=${process.env.APP_ID}&app_key=${process.env.APP_KEY}&random=true`)
+    console.log(response.data.hits);
+    console.log("data fetched");
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal server error');
   }
 });
 

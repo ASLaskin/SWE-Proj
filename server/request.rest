@@ -25,5 +25,14 @@ Content-Type: application/json
 
 ###
 
+POST http://localhost:5000/swiping
+Content-Type: application/json
+
+{
+    "food": "food"
+}
+
+###
+
 GET http://localhost:5000/recipies/:query
 Content-Type: application/json
