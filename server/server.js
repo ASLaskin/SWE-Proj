@@ -112,11 +112,10 @@ app.post('/users/logout', (req, res) => {
   });
 });
 
-app.get('/profile', (req, res) => {
+app.get('/users/profile', (req, res) => {
   if (req.session.user) {
-    console.log(req.session.user);
     const username = req.session.user.name;
-    res.status(200).json({ data: username}); 
+    res.status(200).json({ data: username }); 
   } else {
     res.status(401).json({ error: 'Unauthorized' });
   }

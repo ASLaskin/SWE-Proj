@@ -25,7 +25,7 @@ Content-Type: application/json
 
 ###
 
-GET http://localhost:5000/profile
+GET http://localhost:5000/users/profile
 Content-Type: application/json
 
 ###
