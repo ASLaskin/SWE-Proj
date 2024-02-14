@@ -4,8 +4,10 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
+const session = require('express-session');
 
 const MONGODB_PASS = process.env.MongoDBPass;
+const sessionSecret = process.env.SESSION_SECRET;
 
 if (!MONGODB_PASS) {
   console.error('MongoDB password is not provided in the environment variable.');
@@ -16,16 +18,27 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-const mongoURI = `mongodb+srv://SWEPassword1:${encodeURIComponent(MONGODB_PASS)}@cluster0.azznp8r.mongodb.net/?retryWrites=true&w=majority`;
+app.use(
+  session({
+    secret: sessionSecret,
+    resave: false,
+    saveUninitialized: true,
+  }),
+);
 
-mongoose.connect(mongoURI, {})
+const mongoURI = `mongodb+srv://SWEPassword1:${encodeURIComponent(
+  MONGODB_PASS,
+)}@cluster0.azznp8r.mongodb.net/?retryWrites=true&w=majority`;
+
+mongoose
+  .connect(mongoURI, {})
   .then(() => {
-    console.log("Connected to MongoDB");
+    console.log('Connected to MongoDB');
   })
   .catch((err) => {
-    console.error("Error connecting to MongoDB:", err);
+    console.error('Error connecting to MongoDB:', err);
   });
-  
+
 const db = mongoose.connection;
 
 const userSchema = new mongoose.Schema({
@@ -69,6 +82,7 @@ app.post('/users/login', async (req, res) => {
 
     const isPasswordValid = await bcrypt.compare(req.body.password, user.password);
     if (isPasswordValid) {
+      req.session.user = { name: user.name };
       res.send('Success');
     } else {
       res.send('Not Allowed');
@@ -76,6 +90,35 @@ app.post('/users/login', async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).send('Internal Server Error');
+  }
+});
+
+app.get('/protected-route', (req, res) => {
+  if (req.session.user) {
+    res.send('You are authenticated');
+  } else {
+    res.status(401).send('Unauthorized');
+  }
+});
+
+app.post('/users/logout', (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send('Internal Server Error');
+    } else {
+      res.send('Logged out successfully');
+    }
+  });
+});
+
+app.get('/profile', (req, res) => {
+  if (req.session.user) {
+    console.log(req.session.user);
+    const username = req.session.user.name;
+    res.status(200).json({ data: username}); 
+  } else {
+    res.status(401).json({ error: 'Unauthorized' });
   }
 });
 

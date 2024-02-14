@@ -19,6 +19,15 @@ POST http://localhost:5000/users/login
 Content-Type: application/json
 
 {
-    "name": "username",
-    "password": "password"
+    "name": "admin",
+    "password": "admin"
 }
+
+###
+
+GET http://localhost:5000/profile
+Content-Type: application/json
+
+###
+
+POST http://localhost:5000/users/logout
