@@ -95,7 +95,6 @@ app.post('/swiping', async (req, res) => {
     const response = await axios.get(`https://api.edamam.com/api/recipes/v2?type=any&beta=false&q=${req.body.food}&app_id=${process.env.APP_ID}&app_key=${process.env.APP_KEY}&random=true`)
     console.log(response.data.hits[0].recipe.label);
     console.log("data fetched");
-    console.log(response.data);
     res.json(response.data);
   } catch (error) {
     console.error(error);
