@@ -9,9 +9,11 @@ const Swiping = () => {
 
     const getRecipes = async () => {
         try {
-            await axios.post('http://localhost:5000/swiping', {
+            const Response = await axios.post('http://localhost:5000/swiping', {
                 food: food,
             });
+            setResponse(Response.data.hits[0].recipe.label);
+            console.log(Response);
         } catch (error) {
             console.error('Error fetching data', error);
             alert('Unsuccessful call');
@@ -31,6 +33,7 @@ const Swiping = () => {
             </form>
 
             <h1 onClick={getRecipes} className='rounded text-bold text-8xl bg-blue-500'>run</h1>
+            <h2>{response}</h2>
 
         </>
 
