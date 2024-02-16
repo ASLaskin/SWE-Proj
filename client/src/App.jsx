@@ -5,7 +5,6 @@ function App() {
 
 
   return (
-    <>
       <Router>
         <Routes>
           <Route path='/' element={<Home />} />
@@ -16,7 +15,6 @@ function App() {
           <Route path='/swiping' element={<Swiping />} />
         </Routes>
       </Router>
-    </>
   );
 }
 
