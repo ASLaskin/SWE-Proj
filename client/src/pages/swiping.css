@@ -1,0 +1,30 @@
+.imageStack {
+  position: relative;
+  width: 100px;
+}
+
+
+
+
+.card {
+  background-size: contain;
+  background-repeat: no-repeat;
+  width: 300px;
+  height: 300px;
+  position: absolute;
+}
+
+.card:first-child {
+  z-index: 1;
+}
+
+.card:last-child {
+  z-index: 0;
+}
+
+
+
+
+.swipe {
+  transition: transform 0.1s ease-out;
+}
