@@ -25,7 +25,7 @@ const Header = () => {
               </li>
               <li>
                 <a
-                  href='#'
+                  href='https://github.com/ASLaskin/SWE-Proj'
                   className='text-secondaryColor block py-2 px-3 text-#102B3F rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-accent md:p-0  '
                 >
                   OpenSource
