@@ -15,6 +15,8 @@ const Login = () => {
       await axios.post('http://localhost:5000/users/login', {
         name: name,
         password: password,
+      }, {
+        withCredentials: true, 
       });
       console.log('Login successful!');
       navigate('/swiping');
