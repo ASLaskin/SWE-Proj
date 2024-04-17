@@ -47,15 +47,33 @@ function App() {
     },
   ];
 
+  useEffect(() => {
+    async function fetchRatings() {
+      try {
+        const response = await axios.get("http://localhost:5000/preferences");
+        const fetchedRatings = response.data;
+        setRatings(fetchedRatings);
+      } catch (error) {
+        console.error("Error fetching ratings:", error);
+      }
+    }
+
+    fetchRatings();
+  }, []);
+
   const handleCheckboxChange = (event, index) => {
     const updatedRatings = [...ratings];
     updatedRatings[index] = event.target.checked;
     setRatings(updatedRatings);
   };
 
-  const handleAnswerSubmit = () => {
-    setShowResults(true);
-    localStorage.setItem("ratings", JSON.stringify(ratings));
+  const handleAnswerSubmit = async () => {
+    try {
+      await axios.post("http://localhost:5000/preferences", ratings);
+      setShowResults(true);
+    } catch (error) {
+      console.error("Error submitting preferences:", error);
+    }
   };
 
   React.useEffect(() => {
