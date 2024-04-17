@@ -3,7 +3,7 @@ import React, { useState } from "react";
 function App() {
   const [showResults, setShowResults] = useState(false);
   const [ratings, setRatings] = useState(Array(10).fill(false)); // Array with 10 false values
-
+// take use state and push it into array
   const questions = [
     {
       cuisine: "Indian",
@@ -23,7 +23,7 @@ function App() {
     },
     {
       cuisine: "Thai",
-      text: "Thai?",
+      text: "Thai",
     },
     {
       cuisine: "Chinese",
