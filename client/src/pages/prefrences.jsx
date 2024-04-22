@@ -3,7 +3,7 @@ import React, { useState } from "react";
 function App() {
   const [showResults, setShowResults] = useState(false);
   const [ratings, setRatings] = useState(Array(10).fill(false)); // Array with 10 false values
-
+// take use state and push it into array
   const questions = [
     {
       cuisine: "Indian",
@@ -23,7 +23,7 @@ function App() {
     },
     {
       cuisine: "Thai",
-      text: "Thai?",
+      text: "Thai",
     },
     {
       cuisine: "Chinese",
@@ -47,15 +47,33 @@ function App() {
     },
   ];
 
+  useEffect(() => {
+    async function fetchRatings() {
+      try {
+        const response = await axios.get("http://localhost:5000/preferences");
+        const fetchedRatings = response.data;
+        setRatings(fetchedRatings);
+      } catch (error) {
+        console.error("Error fetching ratings:", error);
+      }
+    }
+
+    fetchRatings();
+  }, []);
+
   const handleCheckboxChange = (event, index) => {
     const updatedRatings = [...ratings];
     updatedRatings[index] = event.target.checked;
     setRatings(updatedRatings);
   };
 
-  const handleAnswerSubmit = () => {
-    setShowResults(true);
-    localStorage.setItem("ratings", JSON.stringify(ratings));
+  const handleAnswerSubmit = async () => {
+    try {
+      await axios.post("http://localhost:5000/preferences", ratings);
+      setShowResults(true);
+    } catch (error) {
+      console.error("Error submitting preferences:", error);
+    }
   };
 
   React.useEffect(() => {
