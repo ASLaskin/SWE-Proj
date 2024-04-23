@@ -68,6 +68,8 @@ function App() {
     setRatings(updatedRatings);
   };
 
+  //Change here so if user already has stuff in their preferences 
+  //We can update it 
   const handleAnswerSubmit = async () => {
     try {
       await axios.post("http://localhost:5000/preferences", {
@@ -80,6 +82,7 @@ function App() {
   };
 
   useEffect(() => {
+    //Idk what this is 
     const storedRatings = JSON.parse(localStorage.getItem("ratings")) || Array(10).fill(false);
     setRatings(storedRatings);
   }, []);

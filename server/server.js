@@ -147,6 +147,7 @@ app.post('/swiping', async (req, res) => {
   }
 });
 
+//This fetches the users preferences 
 app.get('/preferences/:userID', async (req, res) => {
   try {
     const userId = req.params.userID;
