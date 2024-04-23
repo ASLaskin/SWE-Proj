@@ -69,7 +69,7 @@ function App() {
   };
 
   const handleAnswerSubmit = async () => {
-    try {
+    try 
       console.log(ratings);
       await axios.post("http://localhost:5000/preferences", {
         preferences: ratings
@@ -123,3 +123,4 @@ function App() {
 }
 
 export default App;
+
