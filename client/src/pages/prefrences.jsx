@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from 'axios';
 
 function App() {
   const [showResults, setShowResults] = useState(false);
@@ -50,9 +51,9 @@ function App() {
   useEffect(() => {
     async function fetchRatings() {
       try {
-        const response = await axios.get("http://localhost:5000/preferences");
-        const fetchedRatings = response.data;
-        setRatings(fetchedRatings);
+        // const response = await axios.get("http://localhost:5000/preferences");
+        // const fetchedRatings = response.data;
+        // setRatings(fetchedRatings);
       } catch (error) {
         console.error("Error fetching ratings:", error);
       }
@@ -68,15 +69,18 @@ function App() {
   };
 
   const handleAnswerSubmit = async () => {
-    try {
-      await axios.post("http://localhost:5000/preferences", ratings);
+    try 
+      console.log(ratings);
+      await axios.post("http://localhost:5000/preferences", {
+        preferences: ratings
+      });
       setShowResults(true);
     } catch (error) {
       console.error("Error submitting preferences:", error);
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     const storedRatings = JSON.parse(localStorage.getItem("ratings")) || Array(10).fill(false);
     setRatings(storedRatings);
   }, []);
@@ -119,3 +123,4 @@ function App() {
 }
 
 export default App;
+
