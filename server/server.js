@@ -5,27 +5,24 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const session = require('express-session');
+const MongoStore = require('connect-mongo')(session);
+const uuidv4 = require('uuid').v4;
 const axios = require('axios');
 
 const MONGODB_PASS = process.env.MongoDBPass;
-const sessionSecret = process.env.SESSION_SECRET;
 
 if (!MONGODB_PASS) {
   console.error('MongoDB password is not provided in the environment variable.');
-  process.exit(1); // Exit the process if the password is not provided
+  process.exit(1); 
 }
 
 const app = express();
 app.use(express.json());
-app.use(cors());
-
-app.use(
-  session({
-    secret: sessionSecret,
-    resave: false,
-    saveUninitialized: true,
-  }),
-);
+const corsOptions = {
+  origin: 'http://localhost:5173', 
+  credentials: true,
+};
+app.use(cors(corsOptions));
 
 const mongoURI = `mongodb+srv://SWEPassword1:${encodeURIComponent(
   MONGODB_PASS,
@@ -50,15 +47,18 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', userSchema);
 
-app.get('/users', async (req, res) => {
-  try {
-    const users = await User.find();
-    res.json(users);
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Internal Server Error');
-  }
-});
+app.use(session({
+  secret: 'your-secret', // replace with a random string for session encryption
+  resave: false,
+  saveUninitialized: false,
+  store: new MongoStore({ mongooseConnection: mongoose.connection }), // Session store using MongoDB
+  cookie: {
+    maxAge: 1000 * 60 * 60 * 24, 
+    httpOnly: true, 
+  },
+}));
+
+const sessions = {};
 
 app.post('/users', async (req, res) => {
   try {
@@ -84,7 +84,10 @@ app.post('/users/login', async (req, res) => {
 
     const isPasswordValid = await bcrypt.compare(req.body.password, user.password);
     if (isPasswordValid) {
-      req.session.user = { name: user.name };
+      const sessionId = uuidv4();
+      req.session.userId = user._id; 
+      sessions[sessionId] = user;
+      res.set('Set-Cookie', `sessionId=${sessionId}`);
       res.send('Success');
     } else {
       res.send('Not Allowed');
@@ -95,33 +98,38 @@ app.post('/users/login', async (req, res) => {
   }
 });
 
-app.get('/protected-route', (req, res) => {
-  if (req.session.user) {
-    res.send('You are authenticated');
-  } else {
-    res.status(401).send('Unauthorized');
-  }
-});
-
 app.post('/users/logout', (req, res) => {
   req.session.destroy((err) => {
     if (err) {
       console.error(err);
       res.status(500).send('Internal Server Error');
     } else {
+      res.clearCookie('sessionId');
       res.send('Logged out successfully');
     }
   });
 });
-
-app.get('/users/profile', (req, res) => {
-  if (req.session.user) {
-    const username = req.session.userId;
-    res.status(200).json({ data: username }); 
-  } else {
-    res.status(401).json({ error: 'Unauthorized' });
+app.get('/users/profile', async (req, res) => {
+  try {
+    if (req.session && req.session.userId) {
+      const user = await User.findById(req.session.userId);
+      if (user) {
+        res.json({ name: user.name });
+      } else {
+        res.status(404).send('User not found');
+      }
+    } else {
+      res.status(401).send('Unauthorized');
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal Server Error');
   }
 });
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
 
 app.post('/swiping', async (req, res) => {
   try {
@@ -158,3 +166,4 @@ app.post('/preferences', async (req, res) => {
 });
 
 app.listen(5000, () => console.log('Server running on port 5000'));
+
