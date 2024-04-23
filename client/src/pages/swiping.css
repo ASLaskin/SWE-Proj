@@ -1,20 +1,71 @@
-.imageStack {
-    position: relative;
-    width: 100px;
+
+.specific-page{
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  width: 100vw;
+  min-height: 100vh;
+  overflow: hidden;
+  background-image: linear-gradient(to bottom, rgba(50,100,200,0.5), rgba(100,50,200,0.5));
 }
 
+.specific-page {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.imageStack {
+  position: relative;
+  width: 100px;
+}
+
+.card h3 {
+  position: absolute;
+  bottom: 0;
+  margin: 10px;
+}
+
+/* .cardContainer {
+  width: 1000vw;
+  max-width: 1000px;
+  height: 1000px;
+  /* display: flex; Make cardContainer a flex container */
+  /* justify-content: center; Center the cards horizontally */
+  /* align-items: center; Center the cards vertically */
+  /* width: 90vw; 
+  max-width: 260px;
+  height: 300px; 
+}*/
+
 .card {
-    background-size: contain;
-    background-repeat: no-repeat;
-    width: 300px;
-    height: 300px;
-    position: absolute;
-  }
-  
-  .card:first-child {
-    z-index: 1;
-  }
-  
-  .card:last-child {
-    z-index: 0;
-  }
+  position: relative;
+  background-size: contain;
+  background-repeat: no-repeat;
+  /* width: 100%;
+  height: auto; */
+  width: 100vw;
+  max-width: 300px;
+  height: 300px;
+  /* box-shadow: 0px 0px 60px 0px rgba(0,0,0,0.30); */
+  background-size: cover;
+  background-position: center; 
+  background-size: contain;
+  background-repeat: no-repeat;
+  /* width: 300px;
+  height: 300px; */
+  position: absolute;
+}
+
+.card:first-child {
+  z-index: 1;
+}
+
+.card:last-child {
+  z-index: 0;
+}
+
+.swipe {
+  transition: transform 0.1s ease-out;
+}

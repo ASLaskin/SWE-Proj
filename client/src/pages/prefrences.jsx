@@ -1,133 +1,125 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from 'axios';
 
 function App() {
   const [showResults, setShowResults] = useState(false);
-  const [score, setScore] = useState(0);
-  const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [ratings, setRatings] = useState([]);
-
+  const [ratings, setRatings] = useState(Array(10).fill(false)); // Array with 10 false values
+// take use state and push it into array
   const questions = [
     {
       cuisine: "Indian",
-      text: "How would you rate Indian food?",
-      description: "On a scale of 1-100 with 1 being bad and 100 being good",
+      text: "Indian",
     },
     {
       cuisine: "Italian",
-      text: "What are your thoughts on Italian cuisine?",
-      description: "Rate it from 1 to 100",
+      text: "Italian",
     },
     {
       cuisine: "Japanese",
-      text: "How do you feel about Japanese food?",
-      description: "Give it a score between 1 and 100",
+      text: "Japanese",
     },
     {
       cuisine: "Mexican",
-      text: "What's your opinion on Mexican dishes?",
-      description: "Rate them from 1 to 100",
+      text: "Mexican",
     },
     {
       cuisine: "Thai",
-      text: "How much do you enjoy Thai food?",
-      description: "Scale of 1 to 100",
+      text: "Thai",
     },
     {
       cuisine: "Chinese",
-      text: "Rate Chinese cuisine:",
-      description: "1 (not a fan) to 100 (love it)",
+      text: "Chinese",
     },
     {
       cuisine: "Greek",
-      text: "What's your preference for Greek food?",
-      description: "Score it from 1 to 100",
+      text: "Greek",
     },
     {
       cuisine: "French",
-      text: "How would you rate French cuisine?",
-      description: "On a scale of 1-100",
+      text: "French",
     },
     {
       cuisine: "Korean",
-      text: "Opinion on Korean dishes?",
-      description: "Give it a score between 1 and 100",
+      text: "Korean",
     },
     {
       cuisine: "Brazilian",
-      text: "What's your overall impression of Brazilian food?",
-      description: "Rate it from 1 to 100",
+      text: "Brazilian",
     },
   ];
 
-  const handleSliderChange = (event) => {
-    const rating = parseInt(event.target.value, 10);
-    setScore(rating);
-  };
-
-  const handleAnswerSubmit = () => {
-    const updatedRatings = [...ratings];
-    updatedRatings[currentQuestion] = score;
-    setRatings(updatedRatings);
-  
-    if (currentQuestion === questions.length - 1) {
-      setShowResults(true);
-    } else {
-      setCurrentQuestion(currentQuestion + 1);
+  useEffect(() => {
+    async function fetchRatings() {
+      try {
+        // const response = await axios.get("http://localhost:5000/preferences");
+        // const fetchedRatings = response.data;
+        // setRatings(fetchedRatings);
+      } catch (error) {
+        console.error("Error fetching ratings:", error);
+      }
     }
-  
-    localStorage.setItem("ratings", JSON.stringify(updatedRatings));
+
+    fetchRatings();
+  }, []);
+
+  const handleCheckboxChange = (event, index) => {
+    const updatedRatings = [...ratings];
+    updatedRatings[index] = event.target.checked;
+    setRatings(updatedRatings);
   };
 
-  React.useEffect(() => {
-    const storedRatings = JSON.parse(localStorage.getItem("ratings")) || [];
+  const handleAnswerSubmit = async () => {
+    try {
+      console.log(ratings);
+      await axios.post("http://localhost:5000/preferences", {
+        preferences: ratings
+      });
+      setShowResults(true);
+    } catch (error) {
+      console.error("Error submitting preferences:", error);
+    }
+  };
+
+  useEffect(() => {
+    const storedRatings = JSON.parse(localStorage.getItem("ratings")) || Array(10).fill(false);
     setRatings(storedRatings);
   }, []);
 
   return (
-    <div className="App">
-      {showResults ? (
-        <div>
-          <h2>Preferences</h2>
-          {questions.map((question, index) => (
-            <p key={index}>
-              {question.cuisine}: {ratings[index]}
-            </p>
-          ))}
-        </div>
-      ) : (
-        <div>
-          <p>{questions[currentQuestion].text}</p>
-          <p>{questions[currentQuestion].description}</p>
-          <Slider onChange={handleSliderChange} />
-          <button onClick={handleAnswerSubmit}>Submit</button>
-        </div>
-      )}
+    <div className="bg-gray-100 min-h-screen flex items-center justify-center">
+      <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-lg">
+        {showResults ? (
+          <div className="results-container">
+            <h2 className="text-2xl font-semibold mb-4">Preferences</h2>
+            {questions.map((question, index) => (
+              <p key={index} className="mb-2">
+                {question.cuisine}: {ratings[index] ? "Yes" : "No"}
+              </p>
+            ))}
+          </div>
+        ) : (
+          <div className="form-container">
+            <h2 className="text-2xl font-semibold mb-4">Pick Cuisine Preferences</h2>
+            {questions.map((question, index) => (
+              <div className="checkbox-item mb-2" key={index}>
+                <p className="flex items-center">
+                  {question.text}&nbsp;
+                  <label className="ml-2">
+                    <input
+                      type="checkbox"
+                      checked={ratings[index]}
+                      onChange={(event) => handleCheckboxChange(event, index)}
+                    />
+                  </label>
+                </p>
+              </div>
+            ))}
+            <button className="mt-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded" onClick={handleAnswerSubmit}>Submit</button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
-
-const Slider = ({ onChange }) => {
-  const [value, setValue] = useState(50);
-
-  const handleChange = (event) => {
-    const newValue = parseInt(event.target.value, 10); 
-    setValue(newValue); 
-    onChange(event); // Notify parent component about the change
-  };
-
-  return (
-    <div>
-      <input
-        type="range"
-        min={0}
-        max={100}
-        value={value}
-        onChange={handleChange}
-      />
-      <p>Value: {value}</p>
-    </div>
-  );
-};
-
 
 export default App;
