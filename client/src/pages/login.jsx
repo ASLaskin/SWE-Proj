@@ -7,19 +7,27 @@ import { useNavigate } from 'react-router-dom';
 const Login = () => {
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
-  const navigate = useNavigate();
 
   const handleLogin = async (event) => {
     try {
       event.preventDefault();
-      await axios.post('http://localhost:5000/users/login', {
+      const response = await axios.post('http://localhost:5000/users/login', {
         name: name,
         password: password,
       }, {
         withCredentials: true, 
       });
-      console.log('Login successful!');
-      navigate('/swiping');
+      console.log("here");
+      const userId = response.data.userId;
+      console.log("here2")
+      const preferencesResponse = await axios.get(`http://localhost:5000/preferences/${userId}`);
+      console.log("here3")
+      if (preferencesResponse.data.preferences && preferencesResponse.data.preferences.length > 0) {
+        window.location.href = '/swiping';
+      } else {
+        window.location.href = '/prefrences';
+      }
+      
     } catch (error) {
       console.error('Error during login:', error);
       alert('Login failed!');

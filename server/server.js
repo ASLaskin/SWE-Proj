@@ -13,13 +13,13 @@ const MONGODB_PASS = process.env.MongoDBPass;
 
 if (!MONGODB_PASS) {
   console.error('MongoDB password is not provided in the environment variable.');
-  process.exit(1); 
+  process.exit(1);
 }
 
 const app = express();
 app.use(express.json());
 const corsOptions = {
-  origin: 'http://localhost:5173', 
+  origin: 'http://localhost:5173',
   credentials: true,
 };
 app.use(cors(corsOptions));
@@ -47,16 +47,18 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', userSchema);
 
-app.use(session({
-  secret: 'your-secret', // replace with a random string for session encryption
-  resave: false,
-  saveUninitialized: false,
-  store: new MongoStore({ mongooseConnection: mongoose.connection }), // Session store using MongoDB
-  cookie: {
-    maxAge: 1000 * 60 * 60 * 24, 
-    httpOnly: true, 
-  },
-}));
+app.use(
+  session({
+    secret: 'your-secret', // replace with a random string for session encryption
+    resave: false,
+    saveUninitialized: false,
+    store: new MongoStore({ mongooseConnection: mongoose.connection }), // Session store using MongoDB
+    cookie: {
+      maxAge: 1000 * 60 * 60 * 24,
+      httpOnly: true,
+    },
+  }),
+);
 
 const sessions = {};
 
@@ -85,10 +87,10 @@ app.post('/users/login', async (req, res) => {
     const isPasswordValid = await bcrypt.compare(req.body.password, user.password);
     if (isPasswordValid) {
       const sessionId = uuidv4();
-      req.session.userId = user._id; 
+      req.session.userId = user._id;
       sessions[sessionId] = user;
       res.set('Set-Cookie', `sessionId=${sessionId}`);
-      res.send('Success');
+      res.json({ success: true, userId: user._id }); 
     } else {
       res.send('Not Allowed');
     }
@@ -127,17 +129,15 @@ app.get('/users/profile', async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
-
 app.post('/swiping', async (req, res) => {
   try {
     console.log(req.session.user);
 
     // const user = await User.findOne({ name: req.body.name });
     // console.log(req.body.name);
-    const response = await axios.get(`https://api.edamam.com/api/recipes/v2?type=any&beta=false&q=${req.body.food}&app_id=${process.env.APP_ID}&app_key=${process.env.APP_KEY}&cuisineType=Italian&cuisineType=Chinese&random=true`)
+    const response = await axios.get(
+      `https://api.edamam.com/api/recipes/v2?type=any&beta=false&q=${req.body.food}&app_id=${process.env.APP_ID}&app_key=${process.env.APP_KEY}&cuisineType=Italian&cuisineType=Chinese&random=true`,
+    );
     // console.log(response.data.hits[0].recipe.label);
     // console.log("data fetched");
     res.json(response.data);
@@ -147,23 +147,23 @@ app.post('/swiping', async (req, res) => {
   }
 });
 
-app.post('/preferences', async (req, res) => {
+app.get('/preferences/:userID', async (req, res) => {
   try {
-    const userId = req.session.userId;
-      console.log(req.body.preferences);
-        if (!userId) {
-            return res.status(401).json({ error: 'Unauthorized' });
-        }
+    const userId = req.params.userID;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    return res.status(200).json({ preferences: user.preferences });
 
-        const user = await User.findById(userId);
-        if (!user) {
-          return res.status(404).json({ error: 'User not found' });
-        }
   } catch (error) {
-      console.error(error);
-      res.status(500).send('Internal server error');
+    console.error(error);
+    res.status(500).send('Internal server error');
   }
 });
 
-app.listen(5000, () => console.log('Server running on port 5000'));
-
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

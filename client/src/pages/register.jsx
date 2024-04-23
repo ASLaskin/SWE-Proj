@@ -11,7 +11,7 @@ const Registration = () => {
         name: name,
         password: password,
       });
-      alert('Registration successful!');
+      window.location.href = '/login';
     } catch (error) {
       console.error('Error during registration:', error);
       alert('Registration failed!');
