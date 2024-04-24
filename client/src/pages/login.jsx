@@ -15,8 +15,9 @@ const Login = () => {
       }, {
         withCredentials: true, 
       });
-      const userId = response.data.userId;
-      const preferencesResponse = await axios.get(`http://localhost:5000/getPreferences`);
+      const preferencesResponse = await axios.get('http://localhost:5000/getPreferences',
+        { withCredentials: true }
+      );
       if (preferencesResponse.data.preferences && preferencesResponse.data.preferences.length > 0) {
         window.location.href = '/swiping';
       } else {

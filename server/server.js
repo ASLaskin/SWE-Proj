@@ -43,6 +43,11 @@ const userSchema = new mongoose.Schema({
   name: String,
   password: String,
   preferences: Array,
+  savedRecipes: [{
+    name: String,
+    image: String,
+    link: String
+  }]
 });
 
 const User = mongoose.model('User', userSchema);
@@ -142,17 +147,17 @@ app.post('/swiping', async (req, res) => {
         return res.status(404).send('User not found');
     }
 
-    let apiString = `https://api.edamam.com/api/recipes/v2?type=any&beta=false&q=${req.body.food}&app_id=${process.env.APP_ID}&app_key=${process.env.APP_KEY}&random=true`;
+    let apiString = `https://api.edamam.com/api/recipes/v2?type=any&beta=false&app_id=${process.env.APP_ID}&app_key=${process.env.APP_KEY}&random=true`;
     for(let i = 0; i < user.preferences.length; i++) {
       apiString += `&cuisineType=${user.preferences[i]}`
     }
-    console.log(apiString);
     const response = await axios.get(
       apiString,
       // `https://api.edamam.com/api/recipes/v2?type=any&beta=false&q=${req.body.food}&app_id=${process.env.APP_ID}&app_key=${process.env.APP_KEY}&cuisineType=Italian&cuisineType=Chinese&random=true`,
     );
     // console.log(response.data.hits[0].recipe.label);
     // console.log("data fetched");
+    console.log(user.preferences);
     res.json(response.data);
   } catch (error) {
     console.error(error);
@@ -232,6 +237,49 @@ app.get('/getPreferences', async (req, res) => {
     res.status(500).send('Internal server error');
   }
 });
+
+app.post('/pushRecipe', async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    user.savedRecipes.push( {
+      name: req.body.name,
+      image: req.body.image,
+      link: req.body.link
+    });
+    console.log(user.savedRecipes);
+    user.save();
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal server error');
+  }
+});
+
+app.get('/getRecipes', async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    console.log(user);
+    return res.status(200).json({ recipes: user.savedRecipes });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal server error');
+  }
+})
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

@@ -7,17 +7,23 @@ import { Link } from 'react-router-dom';
 const Swiping = () => {
   const [cards, setCards] = useState([]);
   const [images, setImages] = useState([]);
+  const [urlList, setUrlList] = useState([]);
   const cardRefs = cards.map(() => React.createRef());
 
   const onSwipe = (direction, name) => {
     console.log('You swiped: ' + direction + ' on ' + name);
+    if(direction == 'right') {
+      pushRecipe();
+      console.log(":)");
+    }
     setTimeout(() => {
-      setCards((cards) => cards.filter((card) => card !== name));
+        setCards(cards => cards.filter(card => card !== name));
     }, 600); // delay in ms
-    if (cards.length <= 3) {
+    if(cards.length <= 3) {
       getRecipes();
     }
-  };
+
+  }
 
   const onCardLeftScreen = (name) => {
     console.log(name + ' left the screen');
@@ -45,7 +51,7 @@ const Swiping = () => {
 
   //CHANGE THIS TO THE SAVED PAGE
   const changePage2 = () => {
-    window.location.href = '/prefrences';
+    window.location.href = '/display';
   };
 
   const swipe = (dir) => {
@@ -60,30 +66,43 @@ const Swiping = () => {
 
   const getRecipes = async () => {
     try {
-      console.log('here');
-      const Response = await axios.post(
-        'http://localhost:5000/swiping',
-        {
-          food: 'wine',
-        },
-        {
-          withCredentials: true,
-        },
-      );
-      let imgs = [];
-      let recp = [];
-      for (let i = 0; i < 20; i++) {
-        imgs.push(Response.data.hits[i].recipe.image);
-        recp.push(Response.data.hits[i].recipe.label);
-      }
-      setCards([...recp, ...cards]);
-      setImages([...imgs, ...images]);
+        const Response = await axios.post('http://localhost:5000/swiping', {
+            food: "wine",
+        }, {
+          withCredentials: true
+        });
+        let imgs = [];
+        let recp = [];
+        let urls = [];
+        console.log(Response.data);
+        for(let i = 0; i < 20; i++) {
+          imgs.push(Response.data.hits[i].recipe.image);
+          recp.push(Response.data.hits[i].recipe.label);
+          urls.push(Response.data.hits[i].recipe.url);
+        }
+        setCards([...recp, ...cards]);
+        setImages([...imgs, ...images]);
+        setUrlList([...urls, ...urlList]);
     } catch (error) {
       console.error('Error fetching data', error);
-      alert('Unsuccessful call');
     }
   };
 
+  const pushRecipe = async () => {
+    try {
+      let i = cards.length-1
+      await axios.post('http://localhost:5000/pushRecipe', {
+        name: cards[i],
+        image: images[i],
+        link: urlList[i]
+    }, {
+      withCredentials: true
+    });
+    } catch (error) {
+      console.error('Error pushing recipe', error);
+      alert('Unsuccessful call');
+    }
+ }
   useEffect(() => {
     getRecipes();
     return () => {};
