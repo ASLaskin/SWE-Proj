@@ -4,6 +4,7 @@ import Login from './login';
 import Register from './register';
 import Prefrences from './prefrences';
 import Swiping from './swiping';
+import Display from './display';
 
 export { 
     About, 
@@ -11,5 +12,6 @@ export {
     Register,
     Home,
     Prefrences,
-    Swiping
+    Swiping,
+    Display
 };
