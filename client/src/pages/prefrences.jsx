@@ -3,6 +3,7 @@ import axios from 'axios';
 
 function App() {
   const [showResults, setShowResults] = useState(false);
+  const [email, setEmail] = useState('');
   const [ratings, setRatings] = useState(Array(10).fill(false)); // Array with 10 false values
 // take use state and push it into array
   const questions = [
@@ -49,17 +50,19 @@ function App() {
   ];
 
   useEffect(() => {
-    async function fetchRatings() {
+    const fetchUserEmail = async () => {
       try {
-        // const response = await axios.get("http://localhost:5000/preferences");
-        // const fetchedRatings = response.data;
-        // setRatings(fetchedRatings);
+          const response = await axios.get(
+              'http://localhost:5000/users/profile',
+              { withCredentials: true }
+          );
+          setEmail(response.data.email);
+          console.log(email);
       } catch (error) {
-        console.error("Error fetching ratings:", error);
+          throw new Error('Error fetching email:', error);
       }
-    }
-
-    fetchRatings();
+    };
+    fetchUserEmail();
   }, []);
 
   const handleCheckboxChange = (event, index) => {
@@ -72,21 +75,50 @@ function App() {
   //We can update it 
   const handleAnswerSubmit = async () => {
     try {
-      await axios.post("http://localhost:5000/preferences", {
-        preferences: ratings
+      console.log(ratings);
+      await axios.post("http://localhost:5000/pushPreferences", {
+        preferences: ratings,
+        email: email
+      }, {
+        withCredentials: true
       });
+      console.log("anything");
       setShowResults(true);
+      console.log("anything?");
     } catch (error) {
       console.error("Error submitting preferences:", error);
+      console.log("anything!");
     }
   };
 
   useEffect(() => {
-    //Idk what this is 
-    const storedRatings = JSON.parse(localStorage.getItem("ratings")) || Array(10).fill(false);
-    setRatings(storedRatings);
+    const fetchPreferences = async () => {
+      try {
+          const response = await axios.get(
+              'http://localhost:5000/getPreferences',
+              { withCredentials: true }
+          );
+          let storedRatings = Array(10).fill(false);
+          for(let i = 0; i < questions.length; i++) {
+            for(let j = 0; j < response.data.preferences.length; j++) {
+              if(response.data.preferences[j] == questions[i].cuisine) {
+                storedRatings[i] = true;
+                break;
+              }
+            }
+          }
+          setRatings(storedRatings);
+      } catch (error) {
+          throw new Error('Error fetching email:', error);
+      }
+    };
+    try {
+      fetchPreferences();
+    } catch (error) {
+      const storedRatings = Array(10).fill(false);
+      setRatings(storedRatings);
   }, []);
-
+    
   return (
     <div className="bg-gray-100 min-h-screen flex items-center justify-center">
       <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-lg">
