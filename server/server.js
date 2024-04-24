@@ -113,30 +113,43 @@ app.post('/users/logout', (req, res) => {
 });
 app.get('/users/profile', async (req, res) => {
   try {
-    if (req.session && req.session.userId) {
-      const user = await User.findById(req.session.userId);
-      if (user) {
-        res.json({ name: user.name });
-      } else {
-        res.status(404).send('User not found');
+      const userId = req.session.userId;
+      if (!userId) {
+          return res.status(401).send('Unauthorized');
       }
-    } else {
-      res.status(401).send('Unauthorized');
-    }
+
+      const user = await User.findById(userId);
+      if (!user) {
+          return res.status(404).send('User not found');
+      }
+      console.log(user);
+      res.json({ email: user.name });
   } catch (error) {
-    console.error(error);
-    res.status(500).send('Internal Server Error');
+      console.error(error);
+      res.status(500).send('Internal Server Error');
   }
 });
 
 app.post('/swiping', async (req, res) => {
   try {
-    console.log(req.session.user);
+    const userId = req.session.userId;
+    if (!userId) {
+        return res.status(401).send('Unauthorized');
+    }
 
-    // const user = await User.findOne({ name: req.body.name });
-    // console.log(req.body.name);
+    const user = await User.findById(userId);
+    if (!user) {
+        return res.status(404).send('User not found');
+    }
+
+    let apiString = `https://api.edamam.com/api/recipes/v2?type=any&beta=false&q=${req.body.food}&app_id=${process.env.APP_ID}&app_key=${process.env.APP_KEY}&random=true`;
+    for(let i = 0; i < user.preferences.length; i++) {
+      apiString += `&cuisineType=${user.preferences[i]}`
+    }
+    console.log(apiString);
     const response = await axios.get(
-      `https://api.edamam.com/api/recipes/v2?type=any&beta=false&q=${req.body.food}&app_id=${process.env.APP_ID}&app_key=${process.env.APP_KEY}&cuisineType=Italian&cuisineType=Chinese&random=true`,
+      apiString,
+      // `https://api.edamam.com/api/recipes/v2?type=any&beta=false&q=${req.body.food}&app_id=${process.env.APP_ID}&app_key=${process.env.APP_KEY}&cuisineType=Italian&cuisineType=Chinese&random=true`,
     );
     // console.log(response.data.hits[0].recipe.label);
     // console.log("data fetched");
@@ -147,9 +160,64 @@ app.post('/swiping', async (req, res) => {
   }
 });
 
-app.get('/preferences/:userID', async (req, res) => {
+app.post('/pushPreferences', async (req, res) => {
   try {
-    const userId = req.params.userID;
+    const userId = req.session.userId;
+      if (!userId) {
+          return res.status(401).send('Unauthorized');
+      }
+
+      const user = await User.findById(userId);
+      if (!user) {
+          return res.status(404).send('User not found');
+      }
+      let prefs = req.body.preferences;
+      let preferenceList = [];
+      //god i wish there was an easier way to do this
+      if(prefs[0] == true) {
+        preferenceList.push("Indian");
+      }
+      if(prefs[1] == true) {
+        preferenceList.push("Italian");
+      }
+      if(prefs[2] == true) {
+        preferenceList.push("Japanese");
+      }
+      if(prefs[3] == true) {
+        preferenceList.push("Mexican");
+      }
+      if(prefs[4] == true) {
+        preferenceList.push("Thai");
+      }
+      if(prefs[5] == true) {
+        preferenceList.push("Chinese");
+      }
+      if(prefs[6] == true) {
+        preferenceList.push("Greek");
+      }
+      if(prefs[7] == true) {
+        preferenceList.push("French");
+      }
+      if(prefs[8] == true) {
+        preferenceList.push("Korean");
+      }
+      if(prefs[9] == true) {
+        preferenceList.push("Brazilian");
+      }
+      //you did this to me
+
+      user.preferences = preferenceList;
+      user.save();
+      console.log(user.preferences);
+  } catch (error) {
+      console.error(error);
+      res.status(500).send('Internal server error');
+  }
+});
+
+app.get('/getPreferences', async (req, res) => {
+  try {
+    const userId = req.session.userId;
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized' });
     }

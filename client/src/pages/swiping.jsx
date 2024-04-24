@@ -40,6 +40,8 @@ const Swiping = () => {
         console.log("here");
         const Response = await axios.post('http://localhost:5000/swiping', {
             food: "wine",
+        }, {
+          withCredentials: true
         });
         let imgs = [];
         let recp = [];
