@@ -76,7 +76,8 @@ function App() {
   const handleAnswerSubmit = async () => {
     try {
       console.log(ratings);
-      await axios.post("http://localhost:5000/pushPreferences", {
+      window.location.href = '/swiping';
+      const response = await axios.post("http://localhost:5000/pushPreferences", {
         preferences: ratings,
         email: email
       }, {
@@ -84,10 +85,9 @@ function App() {
       });
       console.log("anything");
       setShowResults(true);
-      console.log("anything?");
     } catch (error) {
-      console.error("Error submitting preferences:", error);
       console.log("anything!");
+      console.error("Error submitting preferences:", error);
     }
   };
 
@@ -112,14 +112,13 @@ function App() {
           throw new Error('Error fetching email:', error);
       }
     };
-    try {
-      fetchPreferences();
-    } catch (error) {
-      const storedRatings = Array(10).fill(false);
-      setRatings(storedRatings);
-  }
-}, []);
-
+      try {
+        fetchPreferences();
+      } catch (error) {
+        const storedRatings = Array(10).fill(false);
+        setRatings(storedRatings);
+      }
+    }, []);
     
   return (
     <div className="bg-gray-100 min-h-screen flex items-center justify-center">
