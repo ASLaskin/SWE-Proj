@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import TinderCard from 'react-tinder-card';
 import axios from 'axios';
 import './swiping.css'; // Import your CSS file
+import { Link } from 'react-router-dom';
 
 const Swiping = () => {
   const [cards, setCards] = useState([]);
@@ -29,7 +30,23 @@ const Swiping = () => {
     console.log(cards);
     
   }
-
+  const handleLogout = async (event) => {
+    try {
+      event.preventDefault();
+      await axios.post('http://localhost:5000/users/logout', {
+      }, {
+        withCredentials: true,
+      });
+      window.location.href = '/';
+    }catch (error) {
+      console.error('Error during login:', error);
+      alert('Login failed!');
+    }
+  }
+  const changePage = () => {
+    window.location.href = '/prefrences';
+  }
+  
   const swipe = (dir) => {
     const cardsLeft = cards.filter(card => !alreadyRemoved.includes(card))
     if (cardsLeft.length) {
@@ -38,7 +55,6 @@ const Swiping = () => {
       alreadyRemoved.push(toBeRemoved) // Make sure the next card gets removed next time if this card do not have time to exit the screen
       cardRefs[index].current.swipe(dir) // Swipe the card!
     }
-    
   }
 
   const getRecipes = async () => {
@@ -88,7 +104,11 @@ const Swiping = () => {
   }, []); 
 
   return (
-    
+    <>
+    <div>
+    <h1 onClick={handleLogout}>Logout</h1>
+    <h1 onClick={changePage}>User Preferences</h1>
+    </div>
     <div class="specific-page">
       <div>{cards.length}</div>
       <div className="swiping-container"> {/* New wrapping div */}
@@ -118,7 +138,9 @@ const Swiping = () => {
         <button onClick={() => swipe('left')}></button>
         <button onClick={() => swipe('right')}></button>
       </div>
+     
     </div>
+    </>
   );
 }
 
