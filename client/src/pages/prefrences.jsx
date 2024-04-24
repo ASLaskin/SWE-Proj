@@ -117,7 +117,9 @@ function App() {
     } catch (error) {
       const storedRatings = Array(10).fill(false);
       setRatings(storedRatings);
-  }, []);
+  }
+}, []);
+
     
   return (
     <div className="bg-gray-100 min-h-screen flex items-center justify-center">
